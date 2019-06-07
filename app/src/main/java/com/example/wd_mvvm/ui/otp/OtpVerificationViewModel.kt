@@ -19,7 +19,7 @@ class OtpVerificationViewModel : ViewModel() {
     var otp = MutableLiveData<String>().default("123")
 
     var callback = PinEntryEditText.OnPinEnteredListener {
-        otp.value = "1"
+        _command.value = Command.NextScreen("sal")
     }
 
 }

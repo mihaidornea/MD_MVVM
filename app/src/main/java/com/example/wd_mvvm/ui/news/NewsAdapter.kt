@@ -10,7 +10,13 @@ import com.mcxiaoke.koi.ext.onClick
 
 class NewsAdapter : RecyclerView.Adapter<NewsAdapter.ArticleViewHolder>() {
 
-    private var news = mutableListOf<Article>()
+    var news = mutableListOf<Article>()
+        set(value) {
+            field.clear()
+            field.addAll(value)
+            notifyDataSetChanged()
+        }
+
     var callback: (Int) -> Unit = {}
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticleViewHolder {
@@ -21,13 +27,6 @@ class NewsAdapter : RecyclerView.Adapter<NewsAdapter.ArticleViewHolder>() {
 
     override fun getItemCount() = news.size
 
-
-    fun updateData(data: List<Article>) {
-        news.clear()
-        news.addAll(data)
-        notifyDataSetChanged()
-    }
-
     override fun onBindViewHolder(holder: ArticleViewHolder, position: Int) {
         holder.bindData(news[position])
     }
@@ -35,13 +34,13 @@ class NewsAdapter : RecyclerView.Adapter<NewsAdapter.ArticleViewHolder>() {
 
     inner class ArticleViewHolder(private val binding: NewsArticleItemBinding) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bindData(article : Article) {
+        fun bindData(article: Article) {
             binding.article = article
             Glide.with(binding.root)
                 .load(article.urlToImage)
                 .into(binding.rviArticleIvImage)
             binding.executePendingBindings()
-            binding.root.onClick{
+            binding.root.onClick {
                 callback.invoke(position)
             }
         }

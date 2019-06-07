@@ -9,60 +9,48 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.wd_mvvm.R
+import com.example.wd_mvvm.databinding.FragmentNewsBinding
+import com.example.wd_mvvm.databinding.FragmentNewsBindingImpl
 import com.example.wd_mvvm.models.NewsApiResponse
 import com.example.wd_mvvm.models.article.Article
 import kotlinx.android.synthetic.main.fragment_news.*
+import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.core.get
 
 class NewsFragment : Fragment() {
 
-    private var newsViewModel : NewsViewModel? = null
+    private lateinit var newsViewModel: NewsViewModel
+    private lateinit var binding: FragmentNewsBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        return inflater.inflate(R.layout.fragment_news, container, false)
+        getViewModel()
+        binding = FragmentNewsBinding.inflate(inflater, container, false).apply {
+            this.viewModel = this@NewsFragment.newsViewModel
+            this.lifecycleOwner = viewLifecycleOwner
+        }
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loadUIElements()
-        getViewModel()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        getNews()
+        binding.frNewsRvNews.layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
+        binding.frNewsRvNews.adapter = NewsAdapter()
+        binding.viewModel?.getNews()
     }
 
     private fun getViewModel() {
         newsViewModel = ViewModelProviders.of(this).get(NewsViewModel::class.java)
-        newsViewModel?.init()
     }
 
-    private fun getNews() {
-        newsViewModel!!.getNews()?.observe(this, Observer<NewsApiResponse>{
-            displayNews(it.articles)
-        })
-    }
-
-    private fun loadUIElements() {
-        fr_news_rv_news.layoutManager = LinearLayoutManager(context)
-        fr_news_rv_news.adapter = NewsAdapter()
-        fr_news_iv_back.setOnClickListener{
-            navigatePreviousScreen()
-        }
-    }
-
-    fun navigateNextScreen() {
+    private fun navigateNextScreen() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    fun navigatePreviousScreen() {
+    private fun navigatePreviousScreen() {
         activity?.onBackPressed()
-    }
-
-    fun displayNews(articles: MutableList<Article>) {
-        (fr_news_rv_news?.adapter as NewsAdapter).updateData(articles)
     }
 
     fun displayToast(string: String) {

@@ -4,10 +4,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.wd_mvvm.models.NewsApiResponse
+import com.example.wd_mvvm.models.article.Article
 import com.example.wd_mvvm.repository.Repository
 import com.example.wd_mvvm.ui.main.MainViewModel
 import org.koin.core.KoinComponent
 import org.koin.core.inject
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class NewsViewModel : ViewModel(), KoinComponent {
 
@@ -18,15 +22,21 @@ class NewsViewModel : ViewModel(), KoinComponent {
     private var _command = MutableLiveData<MainViewModel.Command>()
     val command: LiveData<MainViewModel.Command> get() = _command
     private val repository by inject<Repository>()
+    var newsModel: MutableLiveData<NewsApiResponse> = MutableLiveData()
 
-    private var newsModel : MutableLiveData<NewsApiResponse>? = null
+    fun getNews() {
+        repository.getNews("bbc-news", object : Callback<NewsApiResponse> {
+            override fun onFailure(call: Call<NewsApiResponse>, t: Throwable) {
 
-    fun init() {
-        newsModel = repository.getNews("bbc-news")
+            }
+
+            override fun onResponse(call: Call<NewsApiResponse>, response: Response<NewsApiResponse>) {
+                response.body()?.let {
+                    newsModel.value = it
+                }
+            }
+
+        })
+
     }
-
-    fun getNews(): LiveData<NewsApiResponse>? {
-        return newsModel
-    }
-
 }
