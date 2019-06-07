@@ -12,11 +12,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.wd_mvvm.R
 import com.example.wd_mvvm.models.NewsApiResponse
 import com.example.wd_mvvm.models.article.Article
+import com.example.wd_mvvm.utils.isInternetAvailable
 import kotlinx.android.synthetic.main.fragment_news.*
 
 class NewsFragment : Fragment() {
 
-    private var newsViewModel : NewsViewModel? = null
+    private var newsViewModel: NewsViewModel? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -31,24 +32,28 @@ class NewsFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        getNews()
+        getNews(isInternetAvailable(context))
     }
 
     private fun getViewModel() {
         newsViewModel = ViewModelProviders.of(this).get(NewsViewModel::class.java)
-        newsViewModel?.init()
     }
 
-    private fun getNews() {
-        newsViewModel!!.getNews()?.observe(this, Observer<NewsApiResponse>{
-            displayNews(it.articles)
+    private fun getNews(isInternetAvailable: Boolean) {
+        if (isInternetAvailable)
+            newsViewModel!!.getNews()?.observe(this, Observer<NewsApiResponse> {
+                displayNews(it.articles)
+                newsViewModel!!.insertAll(it.articles)
+            })
+        else newsViewModel!!.getSoredArticles().observe(this, Observer<List<Article>> {
+            displayNews(it as MutableList<Article>)
         })
     }
 
     private fun loadUIElements() {
         fr_news_rv_news.layoutManager = LinearLayoutManager(context)
         fr_news_rv_news.adapter = NewsAdapter()
-        fr_news_iv_back.setOnClickListener{
+        fr_news_iv_back.setOnClickListener {
             navigatePreviousScreen()
         }
     }
@@ -61,7 +66,7 @@ class NewsFragment : Fragment() {
         activity?.onBackPressed()
     }
 
-    fun displayNews(articles: MutableList<Article>) {
+    private fun displayNews(articles: MutableList<Article>) {
         (fr_news_rv_news?.adapter as NewsAdapter).updateData(articles)
     }
 
