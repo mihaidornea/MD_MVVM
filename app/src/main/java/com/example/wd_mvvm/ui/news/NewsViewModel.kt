@@ -69,7 +69,6 @@ class NewsViewModel(application: Application) : AndroidViewModel(application), K
             val realmArticles = realm.where(Article::class.java).findAll()
             for (article in realmArticles){
                 replacement.articles?.add(article)
-                _command.value = Command.ErrorToast(article.content)
             }
             newsModel?.postValue(replacement)
         }
