@@ -13,19 +13,7 @@ class RemoteDataSourceImpl : KoinComponent {
 
     private val api by inject<RemoteDataSource>()
 
-    fun getNews(sources: String): MutableLiveData<NewsApiResponse> {
-        val news = MutableLiveData<NewsApiResponse>()
-        api.getNews(sources, Constants.apiKey).enqueue(object : Callback<NewsApiResponse>{
-            override fun onFailure(call: Call<NewsApiResponse>, t: Throwable) {
-                news.value=null
-            }
-
-            override fun onResponse(call: Call<NewsApiResponse>, response: Response<NewsApiResponse>) {
-                if (response.isSuccessful){
-                    news.value = response.body()
-                }
-            }
-        })
-        return news
+    fun getNews(sources: String, callback: Callback<NewsApiResponse>) {
+        api.getNews(sources, Constants.apiKey).enqueue(callback)
     }
 }

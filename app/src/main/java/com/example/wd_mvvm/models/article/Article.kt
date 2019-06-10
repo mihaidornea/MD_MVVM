@@ -1,18 +1,15 @@
 package com.example.wd_mvvm.models.article
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import java.net.URL
+import io.realm.RealmObject
+import io.realm.annotations.PrimaryKey
 
-@Entity(tableName = "article")
-data class Article (
-    var source: Source,
-    var author: String,
-    @PrimaryKey
-    var title: String,
-    var description: String,
-    var url: URL,
-    var urlToImage: URL,
-    var publishedAt: String,
-    var content: String
-)
+open class Article (
+    var source: Source? = Source("", ""),
+    var author: String = "",
+    var title: String  = "",
+    var description: String = "",
+    var url: String = "",
+    var urlToImage: String = "",
+    var publishedAt: String = "",
+    var content: String = ""
+) : RealmObject()

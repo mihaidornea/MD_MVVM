@@ -12,12 +12,24 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.wd_mvvm.R
 import com.example.wd_mvvm.models.NewsApiResponse
 import com.example.wd_mvvm.models.article.Article
+import com.example.wd_mvvm.ui.otp.OtpVerificationViewModel
 import com.example.wd_mvvm.utils.isInternetAvailable
 import kotlinx.android.synthetic.main.fragment_news.*
 
 class NewsFragment : Fragment() {
 
     private var newsViewModel: NewsViewModel? = null
+    private val commandObserver = Observer<NewsViewModel.Command> {
+        when (it) {
+            is NewsViewModel.Command.BackScreen -> {
+                navigatePreviousScreen()
+            }
+            is NewsViewModel.Command.ErrorToast -> {
+                displayToast(it.error)
+            }
+        }
+    }
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -28,25 +40,21 @@ class NewsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         loadUIElements()
         getViewModel()
-    }
-
-    override fun onStart() {
-        super.onStart()
         getNews(isInternetAvailable(context))
     }
 
     private fun getViewModel() {
         newsViewModel = ViewModelProviders.of(this).get(NewsViewModel::class.java)
+        newsViewModel?.apply {
+            command.observe(this@NewsFragment, commandObserver)
+        }
     }
 
     private fun getNews(isInternetAvailable: Boolean) {
-        if (isInternetAvailable)
-            newsViewModel!!.getNews()?.observe(this, Observer<NewsApiResponse> {
-                displayNews(it.articles)
-                newsViewModel!!.insertAll(it.articles)
-            })
-        else newsViewModel!!.getSoredArticles().observe(this, Observer<List<Article>> {
-            displayNews(it as MutableList<Article>)
+        newsViewModel?.getNews(isInternetAvailable)?.observe(this, Observer<NewsApiResponse> {
+            displayNews(it.articles!!)
+            if (isInternetAvailable)
+                newsViewModel?.insertAll(it.articles!!)
         })
     }
 
